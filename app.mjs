@@ -1,13 +1,17 @@
-import express from 'express'
+import express from 'express';
+import { fileURLToPath } from 'url';
+import { dirname, join } from 'path';
+
 
 const app = express()
 const PORT = process.env.PORT || 3000;
-const path = require()
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
-app.use(express.static(_dirname + 'public'));
+app.use(express.static(join(__dirname + 'public')));
 
 app.get('/', (req, res) => {
-  res.send('Hello Express from Render. <a href="/samuel</a>')
+  res.send('Hello Express from Render. <a href="samuel.html">samuel</a>')
 })
 
 // endpoints...middlewares...apis'
@@ -15,7 +19,7 @@ app.get('/', (req, res) => {
 
 app.get('/samuel', (req, res) => {
   // res.send('samuel. <a href="/')
-  res.sendFile('samuel.html');
+  res.sendFile(join(__dirname, 'public', 'samuel.html'));
 })
 
 
