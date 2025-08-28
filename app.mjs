@@ -19,7 +19,7 @@ app.get('/', (req, res) => {
 
 app.get('/samuel', (req, res) => {
   // res.send('samuel. <a href="/')
-  res.sendFile(join(__dirname, 'public', 'samuel.html'));
+  res.sendFile(path.join(__dirname, 'public', 'samuel.html'));
 })
 
 
