@@ -1,6 +1,7 @@
 import express from 'express';
+import path from 'path';
 import { fileURLToPath } from 'url';
-import { dirname, join } from 'path';
+import { dirname } from 'path';
 
 
 const app = express()
@@ -8,10 +9,10 @@ const PORT = process.env.PORT || 3000;
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-app.use(express.static(join(__dirname + 'public')));
+app.use(express.static(path.join(__dirname + 'public')));
 
 app.get('/', (req, res) => {
-  res.send('Hello Express from Render. <a href="samuel.html">samuel</a>')
+  res.send('Hello Express from Render. <a href="samuel">samuel</a>')
 })
 
 // endpoints...middlewares...apis'
@@ -22,7 +23,9 @@ app.get('/samuel', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'samuel.html'));
 })
 
-
+//app.get('/api/samuel', (req, res) => {
+// const myVar = "Howdy";
+//})
 
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}`)
