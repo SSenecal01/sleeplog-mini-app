@@ -1,69 +1,71 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Samuel Page</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
-  <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-
-    body {
-      font-family: 'Inter', sans-serif;
-      background: linear-gradient(to right, #e0eafc, #cfdef3);
-      color: #333;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-    }
-
-    .card {
-      background: #fff;
-      padding: 2rem 3rem;
-      border-radius: 12px;
-      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-      max-width: 400px;
-      text-align: center;
-    }
-
-    h1 {
-      font-size: 2rem;
-      color: #2a2a2a;
-      margin-bottom: 1rem;
-    }
-
-    p {
-      font-size: 1rem;
-      color: #555;
-      margin-bottom: 2rem;
-    }
-
-    .btn {
-      display: inline-block;
-      padding: 0.6rem 1.2rem;
-      font-size: 1rem;
-      color: white;
-      background: #4e89ff;
-      border: none;
-      border-radius: 8px;
-      text-decoration: none;
-      transition: background 0.3s;
-    }
-
-    .btn:hover {
-      background: #3b6edc;
-    }
-  </style>
 </head>
+
 <body>
+  
+<div>
+    <h3>Query Parameter</h3>
+    <input id="queryName" type="text" placeholder="Enter name">
+    <button onclick="sendQuery()">Send Query</button>
+    <div id="queryResult"></div>
+  </div>
+  
+  <div>
+    <h3>URL Parameter</h3>
+    <input id="urlId" type="text" placeholder="Enter id">
+    <button onclick="sendUrl()">Send URL Param</button>
+    <div id="urlResult"></div>
+  </div>
+  
+  
+  <div>
+    <h3>POST Body</h3>
+    <input id="bodyName" type="text" placeholder="Enter name">
+    <button onclick="sendBody()">Send POST Body</button>
+    <div id="bodyResult"></div>
+  </div>
+
+  <script>
+    function sendQuery() {
+  const name = document.getElementById('queryName').value;
+  fetch(`/api/query?name=${encodeURIComponent(name)}`)
+    .then(res => res.json())
+    .then(data => {
+      document.getElementById('queryResult').textContent = data.message;
+    });
+}
+
+function sendUrl() {
+  const id = document.getElementById('urlId').value;
+  fetch(`/api/url/${encodeURIComponent(id)}`)
+    .then(res => res.json())
+    .then(data => {
+      document.getElementById('urlResult').textContent = data.message;
+    });
+}
+
+function sendBody() {
+const name = document.getElementById('bodyName').value;
+  fetch('/api/body', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ name })
+  })
+    .then(res => res.json())
+    .then(data => {
+      document.getElementById('bodyResult').textContent = data.message;
+    });
+}
+  </script>
 
   <div class="card">
-    <h1>Hello, This is Samuel's Page 👋</h1>
+    <h1>This is Samuel's Page👋</h1>
     <p>Welcome to my beautiful and basic HTML page.</p>
     <a href="#" class="btn">Click Me</a>
   </div>
