@@ -3,12 +3,15 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
 import { MongoClient, ServerApiVersion } from 'mongodb';
+import 'dotenv/config';
 
 
 const app = express()
 const PORT = process.env.PORT || 3000;
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
+const uri = process.env.MONGO_URI;
+
 
 app.use(express.static(path.join(__dirname + 'public')));
 
@@ -37,8 +40,6 @@ app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}`)
 })
 
-
-const uri = "mongodb+srv://ssenecal:ssenecal@cluster0.gmyvepv.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0";
 
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
 const client = new MongoClient(uri, {
