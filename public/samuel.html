@@ -1,74 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Samuel Page</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
 </head>
-
 <body>
-  
-<div>
-    <h3>Query Parameter</h3>
-    <input id="queryName" type="text" placeholder="Enter name">
-    <button onclick="sendQuery()">Send Query</button>
-    <div id="queryResult"></div>
-  </div>
-  
-  <div>
-    <h3>URL Parameter</h3>
-    <input id="urlId" type="text" placeholder="Enter id">
-    <button onclick="sendUrl()">Send URL Param</button>
-    <div id="urlResult"></div>
-  </div>
-  
-  
-  <div>
-    <h3>POST Body</h3>
-    <input id="bodyName" type="text" placeholder="Enter name">
-    <button onclick="sendBody()">Send POST Body</button>
-    <div id="bodyResult"></div>
-  </div>
-
-  <script>
-    function sendQuery() {
-  const name = document.getElementById('queryName').value;
-  fetch(`/api/query?name=${encodeURIComponent(name)}`)
-    .then(res => res.json())
-    .then(data => {
-      document.getElementById('queryResult').textContent = data.message;
-    });
-}
-
-function sendUrl() {
-  const id = document.getElementById('urlId').value;
-  fetch(`/api/url/${encodeURIComponent(id)}`)
-    .then(res => res.json())
-    .then(data => {
-      document.getElementById('urlResult').textContent = data.message;
-    });
-}
-
-function sendBody() {
-const name = document.getElementById('bodyName').value;
-  fetch('/api/body', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ name })
-  })
-    .then(res => res.json())
-    .then(data => {
-      document.getElementById('bodyResult').textContent = data.message;
-    });
-}
-  </script>
-
-  <div class="card">
-    <h1>This is Samuel's Page👋</h1>
-    <p>Welcome to my beautiful and basic HTML page.</p>
-    <a href="#" class="btn">Click Me</a>
-  </div>
-
+    <h1>Samuel Page</h1>
 </body>
 </html>
+
+
