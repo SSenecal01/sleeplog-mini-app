@@ -19,14 +19,7 @@ app.use(express.urlencoded({ extended: true })); //parse form data
 app.use(express.static(path.join(__dirname + 'public')));
 
 app.get('/', (req, res) => {
-  res.send('Hello Express from Render. <a href="public/index.html">SleepLog</a>')
-})
-
-// endpoints...middlewares...apis'
-// send an html file
-
-app.get('/trad-forms', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'trad-forms.html'))
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
 })
 
 
