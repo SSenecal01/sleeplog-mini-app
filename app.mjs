@@ -19,7 +19,7 @@ app.use(express.urlencoded({ extended: true })); //parse form data
 app.use(express.static(path.join(__dirname + 'public')));
 
 app.get('/', (req, res) => {
-  res.send('Hello Express from Render. <a href="index">SleepLog</a>')
+  res.send('Hello Express from Render. <a href="public/index.html">SleepLog</a>')
 })
 
 // endpoints...middlewares...apis'
