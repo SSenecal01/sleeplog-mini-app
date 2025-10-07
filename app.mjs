@@ -119,7 +119,7 @@ app.get('/api/diag', async (req, res) => {
     res.status(500).json({ error: 'Internal server error' });
   }
 });
-
+// Connection check
 connectToDb().then(() => {
   app.listen(PORT, () => {
     console.log(`Sleep Log app listening on port ${PORT}`);
