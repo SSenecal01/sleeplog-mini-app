@@ -29,43 +29,95 @@ const client = new MongoClient(uri, {
 
 let db;
 async function connectToDb() {
-  await client.connect();
-
-  db = client.db('SleepLogs'); 
-  console.log('Connected to MongoDB');
+  try {
+    await client.connect();
+    db = client.db('Cluster0');
+    await client.db('admin').command({ ping: 1 });
+    console.log('Connected to MongoDB (db: Cluster0)');
+  } catch (err) {
+    console.error('Failed to connect to MongoDB:', err);
+    throw err;
+  }
 }
 
 app.get('/api/sleep', async (req, res) => {
-  const entries = await db.collection('SleepLogs').find().toArray();
-  res.json(entries);
+  try {
+    if (!db) return res.status(500).json({ error: 'Database not initialized' });
+    const entries = await db.collection('SleepLogs').find().toArray();
+    res.json(entries);
+  } catch (err) {
+    console.error('GET /api/sleep error:', err);
+    res.status(500).json({ error: 'Internal server error' });
+  }
 });
 
 app.get('/api/sleep/user/:name', async (req, res) => {
-  const entries = await db.collection('SleepLogs').find({ name: req.params.name }).toArray();
-  res.json(entries);
+  try {
+    if (!db) return res.status(500).json({ error: 'Database not initialized' });
+    const entries = await db.collection('SleepLogs').find({ name: req.params.name }).toArray();
+    res.json(entries);
+  } catch (err) {
+    console.error('GET /api/sleep/user/:name error:', err);
+    res.status(500).json({ error: 'Internal server error' });
+  }
 });
 
 app.get('/api/sleep/search', async (req, res) => {
-  const { name } = req.query;
-  const entries = await db.collection('SleepLogs').find({ name: { $regex: name, $options: 'i' } }).toArray();
-  res.json(entries);
+  try {
+    if (!db) return res.status(500).json({ error: 'Database not initialized' });
+    const { name } = req.query;
+    if (!name) return res.status(400).json({ error: 'Query parameter "name" is required' });
+    const entries = await db.collection('SleepLogs').find({ name: { $regex: name, $options: 'i' } }).toArray();
+    res.json(entries);
+  } catch (err) {
+    console.error('GET /api/sleep/search error:', err);
+    res.status(500).json({ error: 'Internal server error' });
+  }
 });
 
 app.post('/api/sleep', async (req, res) => {
-  const { name, date, sleepTime, wakeTime, quality } = req.body;
-  const sleep = new Date(`${date}T${sleepTime}`);
-  const wake = new Date(`${date}T${wakeTime}`);
-  const durationMs = wake - sleep < 0 ? wake - sleep + 86400000 : wake - sleep;
-  const hoursSlept = (durationMs / 3600000).toFixed(2);
+  try {
+    if (!db) return res.status(500).json({ error: 'Database not initialized' });
+    const { name, date, sleepTime, wakeTime, quality } = req.body;
+    if (!name || !date || !sleepTime || !wakeTime) {
+      return res.status(400).json({ error: 'Missing required fields' });
+    }
 
-  const entry = { name, date, sleepTime, wakeTime, hoursSlept, quality };
-  const result = await db.collection('SleepLogs').insertOne(entry);
-  res.json(result);
+    const sleep = new Date(`${date}T${sleepTime}`);
+    const wake = new Date(`${date}T${wakeTime}`);
+    const durationMs = wake - sleep < 0 ? wake - sleep + 86400000 : wake - sleep;
+    const hoursSlept = (durationMs / 3600000).toFixed(2);
+
+    const entry = { name, date, sleepTime, wakeTime, hoursSlept, quality };
+    const result = await db.collection('SleepLogs').insertOne(entry);
+    console.log('Inserted SleepLogs document id:', result.insertedId);
+    res.status(201).json({ insertedId: result.insertedId });
+  } catch (err) {
+    console.error('POST /api/sleep error:', err);
+    res.status(500).json({ error: 'Internal server error' });
+  }
 });
 
 app.delete('/api/sleep/:id', async (req, res) => {
-  const result = await db.collection('SleepLogs').deleteOne({ _id: new ObjectId(req.params.id) });
-  res.json(result);
+  try {
+    if (!db) return res.status(500).json({ error: 'Database not initialized' });
+    const result = await db.collection('SleepLogs').deleteOne({ _id: new ObjectId(req.params.id) });
+    res.json(result);
+  } catch (err) {
+    console.error('DELETE /api/sleep/:id error:', err);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+app.get('/api/diag', async (req, res) => {
+  try {
+    if (!db) return res.status(500).json({ error: 'Database not initialized' });
+    const count = await db.collection('SleepLogs').countDocuments();
+    res.json({ dbName: db.databaseName, collection: 'SleepLogs', count });
+  } catch (err) {
+    console.error('GET /api/diag error:', err);
+    res.status(500).json({ error: 'Internal server error' });
+  }
 });
 
 connectToDb().then(() => {
