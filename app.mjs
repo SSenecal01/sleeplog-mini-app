@@ -19,7 +19,6 @@ app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-// MongoDB setup
 const client = new MongoClient(uri, {
   serverApi: {
     version: ServerApiVersion.v1,
@@ -31,24 +30,24 @@ const client = new MongoClient(uri, {
 let db;
 async function connectToDb() {
   await client.connect();
-  db = client.db('cluster0'); // Use your actual database name
+
+  db = client.db('SleepLogs'); 
   console.log('Connected to MongoDB');
 }
 
-// Routes
 app.get('/api/sleep', async (req, res) => {
-  const entries = await db.collection('sleepEntries').find().toArray();
+  const entries = await db.collection('SleepLogs').find().toArray();
   res.json(entries);
 });
 
 app.get('/api/sleep/user/:name', async (req, res) => {
-  const entries = await db.collection('sleepEntries').find({ name: req.params.name }).toArray();
+  const entries = await db.collection('SleepLogs').find({ name: req.params.name }).toArray();
   res.json(entries);
 });
 
 app.get('/api/sleep/search', async (req, res) => {
   const { name } = req.query;
-  const entries = await db.collection('sleepEntries').find({ name: { $regex: name, $options: 'i' } }).toArray();
+  const entries = await db.collection('SleepLogs').find({ name: { $regex: name, $options: 'i' } }).toArray();
   res.json(entries);
 });
 
@@ -60,12 +59,12 @@ app.post('/api/sleep', async (req, res) => {
   const hoursSlept = (durationMs / 3600000).toFixed(2);
 
   const entry = { name, date, sleepTime, wakeTime, hoursSlept, quality };
-  const result = await db.collection('sleepEntries').insertOne(entry);
+  const result = await db.collection('SleepLogs').insertOne(entry);
   res.json(result);
 });
 
 app.delete('/api/sleep/:id', async (req, res) => {
-  const result = await db.collection('sleepEntries').deleteOne({ _id: new ObjectId(req.params.id) });
+  const result = await db.collection('SleepLogs').deleteOne({ _id: new ObjectId(req.params.id) });
   res.json(result);
 });
 
