@@ -2,42 +2,24 @@ import express from 'express';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
-import { MongoClient, ServerApiVersion } from 'mongodb';
+import { MongoClient, ObjectId, ServerApiVersion } from 'mongodb';
 import 'dotenv/config';
 
-
-const app = express()
+const app = express();
 const PORT = process.env.PORT || 3000;
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 const uri = process.env.MONGO_URI;
 
-// trad forms 
-app.use(express.urlencoded({ extended: true })); //parse form data
-
-
-app.use(express.static(path.join(__dirname + 'public')));
+app.use(express.urlencoded({ extended: true }));
+app.use(express.json());
+app.use(express.static(path.join(__dirname, 'public')));
 
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
-})
-
-
-app.get('/api/trad-forms', (req, res) => {
-
 });
 
-app.get('/api/query', (req, res) => {
-    console.log(req);
-
-});
-
-app.listen(PORT, () => {
-  console.log(`Example app listening on port ${PORT}`)
-})
-
-
-// Create a MongoClient with a MongoClientOptions object to set the Stable API version
+// MongoDB setup
 const client = new MongoClient(uri, {
   serverApi: {
     version: ServerApiVersion.v1,
@@ -46,43 +28,52 @@ const client = new MongoClient(uri, {
   }
 });
 
-async function run() {
-  try {
-    // Connect the client to the server	(optional starting in v4.7)
-    await client.connect();
-    // Send a ping to confirm a successful connection
-    await client.db("admin").command({ ping: 1 });
-    console.log("Pinged your deployment. You successfully connected to MongoDB!");
-  } finally {
-    // Ensures that the client will close when you finish/error
-    await client.close();
-  }
+let db;
+async function connectToDb() {
+  await client.connect();
+  db = client.db('cluster0'); // Use your actual database name
+  console.log('Connected to MongoDB');
 }
-run().catch(console.dir);
 
+// Routes
+app.get('/api/sleep', async (req, res) => {
+  const entries = await db.collection('sleepEntries').find().toArray();
+  res.json(entries);
+});
 
-// TRADITIONAL FORM ENDPOINTS - SIMPLIFIED
-// These handle regular HTML form submissions and redirect back
+app.get('/api/sleep/user/:name', async (req, res) => {
+  const entries = await db.collection('sleepEntries').find({ name: req.params.name }).toArray();
+  res.json(entries);
+});
 
-// Traditional Form - Add Student (POST with form data)
-app.post('/api/students/form', async (req, res) => {
-  try {
-    const { name, age, grade } = req.body;
-    
-    // Simple validation
-    if (!name || !age || !grade) {
-      console.log('❌ Form validation failed: Missing required fields');
-      return res.redirect('/traditional-forms.html?error=missing-fields');
-    }
+app.get('/api/sleep/search', async (req, res) => {
+  const { name } = req.query;
+  const entries = await db.collection('sleepEntries').find({ name: { $regex: name, $options: 'i' } }).toArray();
+  res.json(entries);
+});
 
-    const student = { name, age: parseInt(age), grade };
-    const result = await db.collection('students').insertOne(student);
-    
-    console.log(`✅ Student added: ${name} (ID: ${result.insertedId})`);
-    res.redirect('/traditional-forms.html?success=student-added');
-  } catch (error) {
-    console.error('❌ Error adding student:', error.message);
-    res.redirect('/traditional-forms.html?error=database-error');
-  }
+app.post('/api/sleep', async (req, res) => {
+  const { name, date, sleepTime, wakeTime, quality } = req.body;
+  const sleep = new Date(`${date}T${sleepTime}`);
+  const wake = new Date(`${date}T${wakeTime}`);
+  const durationMs = wake - sleep < 0 ? wake - sleep + 86400000 : wake - sleep;
+  const hoursSlept = (durationMs / 3600000).toFixed(2);
+
+  const entry = { name, date, sleepTime, wakeTime, hoursSlept, quality };
+  const result = await db.collection('sleepEntries').insertOne(entry);
+  res.json(result);
+});
+
+app.delete('/api/sleep/:id', async (req, res) => {
+  const result = await db.collection('sleepEntries').deleteOne({ _id: new ObjectId(req.params.id) });
+  res.json(result);
+});
+
+connectToDb().then(() => {
+  app.listen(PORT, () => {
+    console.log(`Sleep Log app listening on port ${PORT}`);
+  });
+}).catch(err => {
+  console.error('Failed to connect to MongoDB:', err);
 });
 
