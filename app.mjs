@@ -98,6 +98,38 @@ app.post('/api/sleep', async (req, res) => {
   }
 });
 
+app.put('/api/sleep/:id', async (req, res) => {
+  try {
+    if (!db) return res.status(500).json({ error: 'Database not initialized' });
+    const { id } = req.params;
+    const { name, date, sleepTime, wakeTime, quality } = req.body;
+
+    if (!name || !date || !sleepTime || !wakeTime) {
+      return res.status(400).json({ error: 'Missing required fields' });
+    }
+
+    const sleep = new Date(`${date}T${sleepTime}`);
+    const wake = new Date(`${date}T${wakeTime}`);
+    const durationMs = wake - sleep < 0 ? wake - sleep + 86400000 : wake - sleep;
+    const hoursSlept = (durationMs / 3600000).toFixed(2);
+
+    const updatedEntry = { name, date, sleepTime, wakeTime, hoursSlept, quality };
+    const result = await db.collection('SleepLogs').updateOne(
+      { _id: new ObjectId(id) },
+      { $set: updatedEntry }
+    );
+
+    if (result.matchedCount === 0) {
+      return res.status(404).json({ error: 'Entry not found' });
+    }
+
+    res.json({ updatedId: id });
+  } catch (err) {
+    console.error('PUT /api/sleep/:id error:', err);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
 app.delete('/api/sleep/:id', async (req, res) => {
   try {
     if (!db) return res.status(500).json({ error: 'Database not initialized' });
